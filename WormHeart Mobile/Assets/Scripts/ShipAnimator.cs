@@ -20,7 +20,7 @@ public class ShipAnimator : MonoBehaviour
     //Settings:
 
     //Memory & Status Variables:
-    internal ShipMode mode; //What mode the drillship is currently in
+    internal ShipMode mode = ShipMode.vertical; //What mode the drillship is currently in
 
     //Debug Stuff:
     [Space()]
@@ -46,8 +46,7 @@ public class ShipAnimator : MonoBehaviour
         if (debugPlayConvertAnim)
         {
             debugPlayConvertAnim = false;
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier *= -1;
-            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;
+            ToggleMode();
         }
 
         //Animate:
@@ -126,20 +125,34 @@ public class ShipAnimator : MonoBehaviour
     }
 
     //Animation Methods:
-    public void ChangeMode(ShipMode targetMode)
+    public void ToggleMode()
     {
-        //Function: Begins change between ship modes (calls flag when done)
+        //Function: Begins change between horizontal and vertical ship modes
 
         //Begin Mode Transition Animation:
-        if (targetMode == ShipMode.horizontal && mode == ShipMode.vertical) //Vertical to horizontal transition
+        if (mode == ShipMode.vertical) //Vertical to horizontal transition
         {
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = 1;
-            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;
+            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = 1; //Set animation to play forward
+            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;      //Play animation
+            DigVisualizer.main.BuildBranch(); //Generate a new branch
         }
-        else if (targetMode == ShipMode.vertical && mode == ShipMode.horizontal) //Horizontal to vertical transition
+        else if (mode == ShipMode.horizontal) //Horizontal to vertical transition
         {
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = -1;
-            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;
+            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = -1; //Set animation to play backward
+            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;       //Play animation
+            DigVisualizer.main.EndBranch(); //End current branch
+        }
+        else if (mode == ShipMode.transitioning) //Mid-transition
+        {
+            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier *= -1;   //Reverse direction of animation
+            if (GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier > 0) //Animation is now playing forward
+            {
+                DigVisualizer.main.BuildBranch(); //Generate a new branch
+            }
+            else //Animation is now playing backward
+            {
+                DigVisualizer.main.EndBranch(); //Cancel in-progress branch if applicable
+            }
         }
 
         //Cleanup:

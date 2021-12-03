@@ -33,7 +33,6 @@ public class ShipController : MonoBehaviour
     public bool debugBrake;
     public bool debugDeploy;
     public bool useMobileDebug;
-    private DeviceOrientation prevOrient;
 
 
     //Runtime Methods:
@@ -47,13 +46,13 @@ public class ShipController : MonoBehaviour
         //Temp Debug Stuff:
         if (useMobileDebug)
         {
-            DeviceOrientation newOrient = Input.deviceOrientation;
-            if (newOrient == DeviceOrientation.LandscapeLeft && prevOrient == DeviceOrientation.Portrait) Deploy(false);
-            if (newOrient == DeviceOrientation.LandscapeRight && prevOrient == DeviceOrientation.Portrait) Deploy(false);
-            if (prevOrient == DeviceOrientation.LandscapeLeft && newOrient == DeviceOrientation.Portrait) Deploy(true);
-            if (prevOrient == DeviceOrientation.LandscapeRight && newOrient == DeviceOrientation.Portrait) Deploy(true);
-            prevOrient = newOrient;
-            if (Input.touchCount > 0) { Accel(); } else if (locoStatus != LocomotionStatus.braking) { Brake(); }
+            DeviceOrientation DO = Input.deviceOrientation;
+            if (ShipAnimator.main.mode != AnimMode.transitioning && CameraManipulator.main.mode != AnimMode.transitioning)
+            {
+                if (DO == DeviceOrientation.Portrait) Deploy(true);
+                if (DO == DeviceOrientation.LandscapeLeft || DO == DeviceOrientation.LandscapeRight) Deploy(false);
+            }
+            if (Input.touchCount > 1) { Accel(true); } else if (Input.touchCount > 0) { Accel(false); } else if (locoStatus != LocomotionStatus.braking) { Brake(); }
         }
         else
         {
@@ -193,6 +192,9 @@ public class ShipController : MonoBehaviour
             locoStatus = LocomotionStatus.braking; //Begin slowing ship down
             return; //Do not deploy yet
         }
+
+        //Check Branch Validity:
+        if (!vertical && !DigVisualizer.main.CheckBranchValidity()) return; //If player is trying to dig a new branch in an invalid location, cancel deployment
 
         //Toggle Mode:
         locoStatus = LocomotionStatus.neutral; //Ensure locomotion status is locked to neutral for the duration of deployment (probably redundant)

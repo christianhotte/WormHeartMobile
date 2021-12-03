@@ -230,8 +230,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 26971647}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -11.0199995, z: 0}
-  m_LocalScale: {x: 6.25, y: 24.088781, z: 1}
+  m_LocalPosition: {x: 0, y: -54.28, z: 0}
+  m_LocalScale: {x: 6.25, y: 111.67799, z: 1}
   m_Children: []
   m_Father: {fileID: 2026602965}
   m_RootOrder: 0
@@ -696,6 +696,7 @@ MonoBehaviour:
   branchInstance: {fileID: 4228070938726726954, guid: c050ea44412bf0e4fbff00b28ae0fbf4, type: 3}
   digSpace: {fileID: 2026602965}
   branchDigTool: {fileID: 1108129163}
+  minDistBetweenBranches: 0.25
 --- !u!114 &84594245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -715,12 +716,12 @@ MonoBehaviour:
   brakeIntensityVert: 0.025
   brakeIntensityHoriz: 0.09
   brakeSnapThresh: 0.06
-  shaftAlignTolerance: 0.05
+  shaftAlignTolerance: 0.085
   debugAccelLeft: 0
   debugAccelRight: 0
   debugBrake: 0
   debugDeploy: 0
-  useMobileDebug: 0
+  useMobileDebug: 1
 --- !u!114 &84594246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1621,8 +1622,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 498234238}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -11.0199995, z: 0}
-  m_LocalScale: {x: 6.25, y: 24.088781, z: 1}
+  m_LocalPosition: {x: 0, y: -54.28, z: 0}
+  m_LocalScale: {x: 6.25, y: 111.67799, z: 1}
   m_Children: []
   m_Father: {fileID: 2026602965}
   m_RootOrder: 1

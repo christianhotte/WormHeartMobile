@@ -15,8 +15,13 @@ public class DigVisualizer : MonoBehaviour
     public Transform digSpace;        //Moving object which drillShip travels through and branches are built in (but not main shaft)
     public Transform branchDigTool;   //Transform marker used to determine behavior of branch start animation
 
+    //Settings:
+    [Header("Settings:")]
+    public float minDistBetweenBranches; //The minimum vertical distance apart player is allowed to build branches
+
     //Memory & Status Vars:
     private Transform currentBranch;   //Branch ship is currently in (if any)
+    private Transform lastBranch;      //Branch ship has most recently been in
 
     //Runtime Methods:
     private void Awake()
@@ -33,9 +38,28 @@ public class DigVisualizer : MonoBehaviour
     }
 
     //Functionality Methods:
+    public bool CheckBranchValidity()
+    {
+        //Function: Determines whether or not a new branch can be built in the current spot, or if the player can re-enter existing branch
+
+        //Check For Valid Conditions:
+        if (lastBranch == null) return true; //Immediately allow branch creation if this is the first branch
+        if (lastBranch.position.y == 0) return true; //Allow player to enter branch they have not yet moved past
+        if (lastBranch.position.y - transform.position.y >= minDistBetweenBranches) return true; //Allow branch creation if player is far enough below previous branch
+
+        //Cleanup:
+        return false; //If no conditions for branch validity are met, deny request to build branch
+    }
     public void BuildBranch()
     {
         //Function: Deploys branch instance and plays build animation
+
+        //Check for Existing Branch:
+        if (lastBranch != null && lastBranch.position.y == 0) //Player has not moved from previous branch
+        {
+            currentBranch = lastBranch; //Reinstate last branch as current branch
+            return;                     //Skip new branch instantiation
+        }
 
         //Set Up New Branch:
         GameObject branch = Instantiate(branchInstance);                  //Instantiate a new instance of branch
@@ -52,6 +76,7 @@ public class DigVisualizer : MonoBehaviour
         if (ShipAnimator.main.mode == AnimMode.transitioning) //Ship is currently transitioning
         {
             //Initialization:
+            if (currentBranch == lastBranch) return; //Prevent branch transition animation from being played on an existing branch
             float branchYPos = currentBranch.Find("endL").position.y; //Get current Y position of tunnel elements
             float digExtent = branchDigTool.position.x; //Get current X position of dig tool (attached to ship mode transition animation)
 
@@ -100,6 +125,7 @@ public class DigVisualizer : MonoBehaviour
     {
         //Function: Completes current branch
 
+        lastBranch = currentBranch; //Store reference to last branch
         currentBranch = null; //Release reference for current branch
     }
 

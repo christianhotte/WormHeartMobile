@@ -87,12 +87,13 @@ public class CameraManipulator : MonoBehaviour
             {
                 transform.position = new Vector3(Mathf.Lerp(0, shaftMisalignment, t), 0, 0); //Gradually correct alignment with simple lerp during camera rotation
             }
-
+            
             //Move Camera:
+            float t2 = modeSwapCurve.Evaluate(t); //Apply raw time interpolant to animation curve for camera mode swap
             float o = 90; if (!prevHorizOrientationLeft) { o *= -1; } //Create variable to align horizontal orientation with last landscape direction
-            cam.transform.eulerAngles = new Vector3(0, 0, Mathf.LerpUnclamped(0, o, modeSwapCurve.Evaluate(t)));        //Lerp camera rotation based on curve and current animation time
-            cam.transform.position = new Vector3(0, Mathf.Lerp(neutralCamPos, -0.05f, modeSwapCurve.Evaluate(t)), -10); //Lerp camera position (to center) based on curve and current animation time
-            cam.orthographicSize = Mathf.LerpUnclamped(vertCamSize, horizCamSize, modeSwapCurve.Evaluate(t));           //Lerp camera size based on curve and current animation time
+            cam.transform.eulerAngles = new Vector3(0, 0, Mathf.LerpUnclamped(0, o, t2));                           //Lerp camera rotation based on curve and current animation time
+            cam.transform.position = new Vector3(transform.position.x, Mathf.Lerp(neutralCamPos, -0.05f, t2), -10); //Lerp camera position (to center) based on curve and current animation time
+            cam.orthographicSize = Mathf.LerpUnclamped(vertCamSize, horizCamSize, t2);                              //Lerp camera size based on curve and current animation time
         }
     }
     private void FixedUpdate()

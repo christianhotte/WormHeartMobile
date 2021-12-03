@@ -14,8 +14,10 @@ public class ShipAnimator : MonoBehaviour
 
     //Settings:
     [Header("Settings:")]
-    public float screwSpeedMultiplier; //Determines mathematical relationship between ship speed (in units per second) and screw animation speed
-    public float drillSpeedMultiplier; //Determines mathematical relationship between ship speed (in units per second) and drill andimation speed
+    public float screwSpeedMultiplier;           //Determines mathematical relationship between ship speed (in units per second) and screw animation speed
+    public float drillSpeedMultiplier;           //Determines mathematical relationship between ship speed (in units per second) and drill andimation speed
+    [Range(0, 1)] public float screwAccelFactor; //Determines how fast screws accelerate to target speed (interpolant calculation in FixedUpdate, used 50 times per second)
+    public float brakeScrewLockThresh;           //Speed threshold at which, while braking, all screws on drillship will lock in place
 
     //Memory & Status Variables:
     internal AnimMode mode = AnimMode.vertical; //What animation mode the drillship is currently in
@@ -45,22 +47,37 @@ public class ShipAnimator : MonoBehaviour
             ComputeAnimation(animation);        //Compute and apply animation movement
         }
 
+    }
+    private void FixedUpdate()
+    {
         //Animate Screws & Drill:
         switch (mode) //Determine screw behavior based on mode
         {
             case AnimMode.vertical:
-                SetScrewSpeed(-ShipController.main.vel.y * screwSpeedMultiplier, 1, 0b0000); //Apply ship speed to all screws (in the same direction)
-                SetDrillSpeed(-ShipController.main.vel.y * drillSpeedMultiplier, 1);         //Apply ship speed to drill
+                //Set Initial Animation Speed:
+                SetScrewSpeed(-ShipController.main.vel.y * screwSpeedMultiplier, screwAccelFactor, 0b0000); //Apply ship speed to all screws (in the same direction)
+                SetDrillSpeed(-ShipController.main.vel.y * drillSpeedMultiplier, screwAccelFactor);         //Apply ship speed to drill
+                //Determine Additional Animation Behaviors:
+                if (ShipController.main.locoStatus == LocomotionStatus.braking) //Drillship is currently braking
+                {
+                    SetScrewSpeed(0, 1, 0b0011); //Lock down rear screws as part of braking animation
+                    if (ShipController.main.vel.y > -brakeScrewLockThresh) //Drillship is near end of braking phase
+                    {
+                        SetScrewSpeed(0, 1, 0b1100); //Lock down other two screws (preventing slow animation jank)
+                        if (GetAnimationByName("ConfigAnim_Braking").InterpolantTime() != 0) SetBrakes(false);   //Stow brakes when almost halted
+                    } else if (GetAnimationByName("ConfigAnim_Braking").InterpolantTime() == 0) SetBrakes(true); //Deploy brakes while braking
+                } else if (GetAnimationByName("ConfigAnim_Braking").InterpolantTime() != 0) SetBrakes(false);    //Stow brakes when not braking
                 break;
             case AnimMode.horizontal:
+                //Set Initial Animation Speed:
                 SetScrewSpeed(ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b1001);  //Apply ship speed to screws (compensating for alternating directions)
                 SetScrewSpeed(-ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b0110); //Apply ship speed to screws (compensating for alternating directions)
                 break;
             case AnimMode.transitioning:
-                SetScrewSpeed(0, 1, 0b0000); //Halt all screws
+                SetScrewSpeed(0, 1, 0b0000); //Lock all screws in stationary position
+                SetDrillSpeed(0, 1);         //Lock drill in stationary position
                 break;
         }
-
     }
 
     //Configuration Methods:
@@ -164,6 +181,20 @@ public class ShipAnimator : MonoBehaviour
         //Initialization:
         if (targetMode == mode) return; //Skip if ship is already in target mode
         ToggleMode(); //Call base function
+    }
+    private void SetBrakes(bool on)
+    {
+        //Function: Plays brake animation (either forward or backward depending on parameter)
+
+        //Initialization:
+        ConfigAnimation anim = GetAnimationByName("ConfigAnim_Braking"); //Get reference for braking animation
+
+        //Play Animation:
+        if (on) anim.speedMultiplier = 1; //Play braking animation forward
+        else anim.speedMultiplier = -1;   //Play braking animation in reverse
+
+        //Cleanup:
+        anim.playing = true;
     }
     private void ComputeAnimation(ConfigAnimation animation)
     {

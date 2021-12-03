@@ -21,7 +21,7 @@ public class ShipController : MonoBehaviour
     public float brakeSnapThresh;    //Lower threshhold at which, when decelerating, drillship will come to a complete stop
 
     //Memory & Status Vars:
-    public LocomotionStatus locoStatus; //Drillship's current locomotion behavior (mutually exclusive states based on most recent input)
+    internal LocomotionStatus locoStatus; //Drillship's current locomotion behavior (mutually exclusive states based on most recent input)
     internal Vector2 vel = new Vector2(); //Drillship's current velocity along both axes
     private bool waitingToDeploy;         //Indicates that a switch mode command has been called but drillship has not yet come to a halt
 
@@ -103,7 +103,6 @@ public class ShipController : MonoBehaviour
         {
             vel.y -= accelVertical * Time.deltaTime;     //Apply acceleration to velocity (factoring in deltaTime)
             vel.y = Mathf.Max(vel.y, -maxSpeedVertical); //Clamp velocity based on max speed
-            print(vel.y);
         }
         else //Ship is digging horizontally (transitioning mode has already been filtered out)
         {

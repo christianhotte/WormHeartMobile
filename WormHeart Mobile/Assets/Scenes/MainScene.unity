@@ -633,8 +633,8 @@ GameObject:
   - component: {fileID: 84594242}
   - component: {fileID: 84594245}
   - component: {fileID: 84594243}
-  - component: {fileID: 84594244}
   - component: {fileID: 84594246}
+  - component: {fileID: 84594244}
   m_Layer: 0
   m_Name: DrillShip
   m_TagString: Untagged
@@ -679,7 +679,7 @@ MonoBehaviour:
   screwSpeedMultiplier: 4
   drillSpeedMultiplier: 3
   screwAccelFactor: 0.6
-  brakeScrewLockThresh: 0.05
+  brakeScrewLockThresh: 0.095
 --- !u!114 &84594244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -708,13 +708,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9523723bfdb18ca4b91355d3da362a80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeedVertical: 2
+  maxSpeedVertical: 3
   maxSpeedHorizontal: 1
   accelVertical: 0.23
   accelHorizontal: 0.35
-  brakeIntensityVert: 0.03
+  brakeIntensityVert: 0.025
   brakeIntensityHoriz: 0.09
-  brakeSnapThresh: 0.02
+  brakeSnapThresh: 0.06
   debugAccel: 0
   debugBrake: 0
   debugDeploy: 0
@@ -774,6 +774,32 @@ MonoBehaviour:
     m_RotationOrder: 4
   modeSwapTime: 0.62
   horizCamSize: 0.8
+  maxSpeedCamPos: 0.17
+  camSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.0013399874
+      outSlope: 0.0013399874
+      tangentMode: 0
+      weightedMode: 2
+      inWeight: 0
+      outWeight: 0.5675273
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.0024119206
+      outSlope: 0.0024119206
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.472973
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stickiness: 0.3
 --- !u!1 &144503525
 GameObject:
   m_ObjectHideFlags: 0
@@ -1763,7 +1789,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.01, y: -0.04, z: -10}
+  m_LocalPosition: {x: 0, y: -0.34, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 84594242}

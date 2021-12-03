@@ -18,12 +18,17 @@ public class CameraManipulator : MonoBehaviour
     public AnimationCurve modeSwapCurve; //Curve describing the transition between horizontal mode camera and vertical mode camera
     public float modeSwapTime;           //Time (in seconds) camera takes to swap modes
     public float horizCamSize;           //Size camera lerps to when in horizontal position
+    [Header("Speed Effects:")]
+    public float maxSpeedCamPos;           //Y position of camera when drillship is travelling vertically at maximum speed
+    public AnimationCurve camSpeedCurve;   //Curve describing the relationship between drillship vertical speed and camera position
+    [Range(0, 1)] public float stickiness; //How fast camera position lerps toward target
 
     //Status & Memory Vars:
     internal AnimMode mode = AnimMode.vertical; //Animation mode camera is currently in
     private float currentTime;                  //Current progression (in seconds) through mode swap animation
     private float speedMultiplier = 1;          //Determines which direction camera transition animation is going in
     private float vertCamSize;                  //Size camera initially starts at
+    private float neutralCamPos;                //Y positiion camera initially starts at (where camera defaults to when drillship is stationary)
     private bool prevHorizOrientationLeft;      //Stores the direction of last landscape orientation (so that either version of landscape can be used)
 
     //Runtime Methods:
@@ -36,7 +41,8 @@ public class CameraManipulator : MonoBehaviour
         cam = Camera.main; //Get reference to camera (not super necessary but eckgh)
 
         //Save Initial Settings:
-        vertCamSize = cam.orthographicSize;
+        vertCamSize = cam.orthographicSize;       //Record initial size of camera
+        neutralCamPos = cam.transform.position.y; //Record initial Y position of camera
     }
     private void Update()
     {
@@ -73,8 +79,19 @@ public class CameraManipulator : MonoBehaviour
 
             //Move Camera:
             float o = 90; if (!prevHorizOrientationLeft) { o *= -1; } //Create variable to align horizontal orientation with last landscape direction
-            cam.transform.eulerAngles = new Vector3(0, 0, Mathf.LerpUnclamped(0, o, modeSwapCurve.Evaluate(t))); //Lerp camera rotation based on curve and current animation time
-            cam.orthographicSize = Mathf.LerpUnclamped(vertCamSize, horizCamSize, modeSwapCurve.Evaluate(t));    //Lerp camera size based on curve and current animation time
+            cam.transform.eulerAngles = new Vector3(0, 0, Mathf.LerpUnclamped(0, o, modeSwapCurve.Evaluate(t)));        //Lerp camera rotation based on curve and current animation time
+            cam.transform.position = new Vector3(0, Mathf.Lerp(neutralCamPos, -0.05f, modeSwapCurve.Evaluate(t)), -10); //Lerp camera position (to center) based on curve and current animation time
+            cam.orthographicSize = Mathf.LerpUnclamped(vertCamSize, horizCamSize, modeSwapCurve.Evaluate(t));           //Lerp camera size based on curve and current animation time
+        }
+    }
+    private void FixedUpdate()
+    {
+        //Lerp Camera Toward Target:
+        if (mode == AnimMode.vertical) //Animate camera while oriented vertically
+        {
+            float t = -ShipController.main.vel.y / ShipController.main.maxSpeedVertical; //Get interpolant value for percentage of max speed drillship is currently travelling at
+            Vector3 targetPos = new Vector3(0, Mathf.Lerp(neutralCamPos, maxSpeedCamPos, camSpeedCurve.Evaluate(t)), -10); //Interpolate target position for camera
+            cam.transform.position = Vector3.Lerp(cam.transform.position, targetPos, stickiness); //Lerp camera toward target
         }
     }
 

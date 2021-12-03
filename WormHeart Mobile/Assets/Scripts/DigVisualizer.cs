@@ -49,7 +49,7 @@ public class DigVisualizer : MonoBehaviour
         if (currentBranch == null) return; //Skip if ship is not currently in a branch
 
         //Determine Build Behavior Based on Ship State:
-        if (ShipAnimator.main.mode == ShipAnim.transitioning) //Ship is currently transitioning
+        if (ShipAnimator.main.mode == AnimMode.transitioning) //Ship is currently transitioning
         {
             //Initialization:
             float branchYPos = currentBranch.Find("endL").position.y; //Get current Y position of tunnel elements

@@ -15,13 +15,10 @@ public class ShipAnimator : MonoBehaviour
     //Settings:
     [Header("Settings:")]
     public float screwSpeedMultiplier; //Determines mathematical relationship between ship speed (in units per second) and screw animation speed
+    public float drillSpeedMultiplier; //Determines mathematical relationship between ship speed (in units per second) and drill andimation speed
 
     //Memory & Status Variables:
-    internal ShipAnim mode = ShipAnim.vertical; //What animation mode the drillship is currently in
-
-    //Debug Stuff:
-    [Space()]
-    public bool debugPlayConvertAnim;
+    internal AnimMode mode = AnimMode.vertical; //What animation mode the drillship is currently in
 
     //Runtime Methods:
     private void Awake()
@@ -39,13 +36,6 @@ public class ShipAnimator : MonoBehaviour
     }
     private void Update()
     {
-        //TEMP Debug Stuff:
-        if (debugPlayConvertAnim)
-        {
-            debugPlayConvertAnim = false;
-            ToggleMode();
-        }
-
         //Run Animations:
         foreach (ConfigAnimation animation in configAnimations) //Iterate through list of all animations
         {
@@ -55,17 +45,18 @@ public class ShipAnimator : MonoBehaviour
             ComputeAnimation(animation);        //Compute and apply animation movement
         }
 
-        //Animate Screws:
+        //Animate Screws & Drill:
         switch (mode) //Determine screw behavior based on mode
         {
-            case ShipAnim.vertical:
+            case AnimMode.vertical:
                 SetScrewSpeed(-ShipController.main.vel.y * screwSpeedMultiplier, 1, 0b0000); //Apply ship speed to all screws (in the same direction)
+                SetDrillSpeed(-ShipController.main.vel.y * drillSpeedMultiplier, 1);         //Apply ship speed to drill
                 break;
-            case ShipAnim.horizontal:
+            case AnimMode.horizontal:
                 SetScrewSpeed(ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b1001);  //Apply ship speed to screws (compensating for alternating directions)
                 SetScrewSpeed(-ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b0110); //Apply ship speed to screws (compensating for alternating directions)
                 break;
-            case ShipAnim.transitioning:
+            case AnimMode.transitioning:
                 SetScrewSpeed(0, 1, 0b0000); //Halt all screws
                 break;
         }
@@ -144,17 +135,17 @@ public class ShipAnimator : MonoBehaviour
         //Begin Mode Transition Animation:
         switch (mode) //Determine behavior based on current mode
         {
-            case ShipAnim.vertical:
+            case AnimMode.vertical:
                 GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = 1; //Set animation to play forward
                 GetAnimationByName("ConfigAnim_ModeTransition").playing = true;      //Play animation
                 DigVisualizer.main.BuildBranch(); //Generate a new branch
                 break;
-            case ShipAnim.horizontal:
+            case AnimMode.horizontal:
                 GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = -1; //Set animation to play backward
                 GetAnimationByName("ConfigAnim_ModeTransition").playing = true;       //Play animation
                 DigVisualizer.main.EndBranch(); //End current branch
                 break;
-            case ShipAnim.transitioning:
+            case AnimMode.transitioning:
                 GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier *= -1; //Reverse direction of animation
                 if (GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier > 0) //Animation is now playing forward
                 { DigVisualizer.main.BuildBranch(); } //Generate a new branch
@@ -164,7 +155,15 @@ public class ShipAnimator : MonoBehaviour
         }
 
         //Cleanup:
-        mode =  ShipAnim.transitioning; //Indicate that ship is now transitioning
+        mode =  AnimMode.transitioning; //Indicate that ship is now transitioning
+    }
+    public void ToggleMode(AnimMode targetMode)
+    {
+        //Overflow: Toggles to specific mode
+
+        //Initialization:
+        if (targetMode == mode) return; //Skip if ship is already in target mode
+        ToggleMode(); //Call base function
     }
     private void ComputeAnimation(ConfigAnimation animation)
     {
@@ -219,8 +218,8 @@ public class ShipAnimator : MonoBehaviour
         //Check For Mode Transition:
         if (animation.name == "ConfigAnim_ModeTransition") //Mode transition animation has just ended
         {
-            if (animation.currentTime <= 0) mode = ShipAnim.vertical; //Ship is now horizontal
-            else mode = ShipAnim.horizontal;                          //Ship is now vertical
+            if (animation.currentTime <= 0) mode = AnimMode.vertical; //Ship is now horizontal
+            else mode = AnimMode.horizontal;                          //Ship is now vertical
         }
     }
 

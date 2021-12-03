@@ -51,7 +51,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 0
-    elementMask: 000001010000
+    elementMask: 00000101000001
     includePos: 1
     includeRot: 1
     includeScl: 0
@@ -97,7 +97,53 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 0
-    elementMask: 010100000101
+    elementMask: 01010000010101
+    includePos: 1
+    includeRot: 1
+    includeScl: 0
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: -0.040448114
+        tangentMode: 5
+        weightedMode: 3
+        inWeight: 0.31197014
+        outWeight: 0.5053244
+      - serializedVersion: 3
+        time: 0.05429536
+        value: -0.051079355
+        inSlope: -0.020393183
+        outSlope: -0.0034564547
+        tangentMode: 1
+        weightedMode: 1
+        inWeight: 0.54489356
+        outWeight: 0.01901785
+      - serializedVersion: 3
+        time: 0.5
+        value: 1.0275879
+        inSlope: -0.010221507
+        outSlope: -0.9195972
+        tangentMode: 65
+        weightedMode: 3
+        inWeight: 0.45055693
+        outWeight: 0.31312123
+      - serializedVersion: 3
+        time: 0.53
+        value: 1
+        inSlope: 0.05535514
+        outSlope: 0.0968086
+        tangentMode: 1
+        weightedMode: 2
+        inWeight: 0.27031443
+        outWeight: 0.40335602
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+    elementMask: 01010101010100
     includePos: 1
     includeRot: 1
     includeScl: 0

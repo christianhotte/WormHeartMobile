@@ -13,6 +13,7 @@ public class Configuration
     internal Transform screw_FR; //Transform of forward-right screw object
     internal Transform screw_BL; //Transform of back-left screw object
     internal Transform screw_BR; //Transform of back-right screw object
+    internal Transform core;     //Transform of core object
 
     internal Transform[] elements; //Array of elements in configuration
 
@@ -28,9 +29,10 @@ public class Configuration
         screw_FR = container.Find("screw_FR");
         screw_BL = container.Find("screw_BL");
         screw_BR = container.Find("screw_BR");
+        core = container.Find("core");
 
         //Organize Elements in Array:
-        elements = new Transform[] { drill, winch, screw_FL, screw_FR, screw_BL, screw_BR }; //Initialize array of all elements
+        elements = new Transform[] { drill, winch, screw_FL, screw_FR, screw_BL, screw_BR, core }; //Initialize array of all elements
     }
     public void FillGaps(Configuration refConfig)
     {

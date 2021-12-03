@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class DigVisualizer : MonoBehaviour
 {
-    //Description: Processes data from ship control scripts and visualizes digging process based on current behavior and statuses
+    //Description: -Processes data from ship control scripts and visualizes digging process based on current behavior and statuses
+    //Description: -Also generates the level as the ship moves
 
     //Objects & Components:
     public static DigVisualizer main; //Singleton instance of this script
-    [Space()]
+    [Header("Branch Generation")]
     public Transform branchRef;       //Container in scene with references for default positions of horizontal tunnel elements
     public GameObject branchInstance; //Prefab containing objects used to build horizontal tunnel
     public Transform digSpace;        //Moving object which drillShip travels through and branches are built in (but not main shaft)
     public Transform branchDigTool;   //Transform marker used to determine behavior of branch start animation
-
-    //Settings:
 
     //Memory & Status Vars:
     private Transform currentBranch;   //Branch ship is currently in (if any)
@@ -39,10 +38,10 @@ public class DigVisualizer : MonoBehaviour
         //Function: Deploys branch instance and plays build animation
 
         //Set Up New Branch:
-        GameObject branch = Instantiate(branchInstance); //Instantiate a new instance of branch
-        branch.transform.position = transform.position;  //Align branch with current position of ship
-        branch.transform.parent = digSpace;              //Child branch to digSpace so that it moves with the rest of the ground
-        currentBranch = branch.transform;                //Save reference of current branch to script
+        GameObject branch = Instantiate(branchInstance);                  //Instantiate a new instance of branch
+        branch.transform.position = ShipAnimator.main.transform.position; //Align branch with current position of ship
+        branch.transform.parent = digSpace;                               //Child branch to digSpace so that it moves with the rest of the ground
+        currentBranch = branch.transform;                                 //Save reference of current branch to script
     }
     public void UpdateBranch()
     {
@@ -50,24 +49,24 @@ public class DigVisualizer : MonoBehaviour
         if (currentBranch == null) return; //Skip if ship is not currently in a branch
 
         //Determine Build Behavior Based on Ship State:
-        if (ShipAnimator.main.mode == ShipAnimator.ShipMode.transitioning) //Ship is currently transitioning
+        if (ShipAnimator.main.mode == ShipAnim.transitioning) //Ship is currently transitioning
         {
             //Initialization:
             float branchYPos = currentBranch.Find("endL").position.y; //Get current Y position of tunnel elements
             float digExtent = branchDigTool.position.x; //Get current X position of dig tool (attached to ship mode transition animation)
 
             //Extend Both Tunnels Evenly:
-            currentBranch.Find("endL").position = new Vector3(-digExtent, branchYPos, transform.position.z); //Hard set position of tunnel end
-            currentBranch.Find("endR").position = new Vector3(digExtent, branchYPos, transform.position.z);  //Hard set position of tunnel end
+            currentBranch.Find("endL").position = new Vector3(-digExtent, branchYPos, 0); //Hard set position of tunnel end
+            currentBranch.Find("endR").position = new Vector3(digExtent, branchYPos, 0);  //Hard set position of tunnel end
             currentBranch.Find("shaftL").localScale = new Vector3(currentBranch.Find("shaftL").localScale.x, digExtent * 100, 1); //Hard set position of tunnel shaft
             currentBranch.Find("shaftR").localScale = new Vector3(currentBranch.Find("shaftR").localScale.x, digExtent * 100, 1); //Hard set position of tunnel shaft
         }
         else //Ship is in full horizontal mode
         {
             //Initialization:
-            float tunnelEndOffset = branchRef.Find("endR").position.x;         //Get base position offset from center of DrillShip
-            float currentLeftExtent = transform.position.x - tunnelEndOffset;  //Get current furthest position left
-            float currentRightExtent = transform.position.x + tunnelEndOffset; //Get current furthest position right
+            float tunnelEndOffset = branchRef.Find("endR").position.x;                           //Get base position offset from center of DrillShip
+            float currentLeftExtent = ShipAnimator.main.transform.position.x - tunnelEndOffset;  //Get current furthest position left
+            float currentRightExtent = ShipAnimator.main.transform.position.x + tunnelEndOffset; //Get current furthest position right
 
             //Extend Tunnel:
             if (currentBranch.Find("endL").position.x > currentLeftExtent) //Branch needs to be extended
@@ -103,7 +102,6 @@ public class DigVisualizer : MonoBehaviour
 
         currentBranch = null; //Release reference for current branch
     }
-    //Utility Functions:
 
 }
 

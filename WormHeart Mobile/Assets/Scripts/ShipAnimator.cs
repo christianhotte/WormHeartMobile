@@ -7,20 +7,17 @@ public class ShipAnimator : MonoBehaviour
     //Description: Handles programmatic animation of DrillShip, called on by other scripts to do so
     //             Also contains state data on DrillShip
 
-    //Classes, Enums & Structs:
-    public enum ShipMode { vertical, transitioning, horizontal };
-
     //Objects & Components:
-    public static ShipAnimator main; //Singleton instance of this script in scene
-    private Configuration baseConfig; //Visible ship components which are moved by this script
-
-    //Animations:
-    public ConfigAnimation[] configAnimations;  //Array of all player ship animations
+    public static ShipAnimator main;           //Singleton instance of this script in scene
+    private Configuration baseConfig;          //Visible ship components which are moved by this script
+    public ConfigAnimation[] configAnimations; //Array of all player ship animations
 
     //Settings:
+    [Header("Settings:")]
+    public float screwSpeedMultiplier; //Determines mathematical relationship between ship speed (in units per second) and screw animation speed
 
     //Memory & Status Variables:
-    internal ShipMode mode = ShipMode.vertical; //What mode the drillship is currently in
+    internal ShipAnim mode = ShipAnim.vertical; //What animation mode the drillship is currently in
 
     //Debug Stuff:
     [Space()]
@@ -49,13 +46,28 @@ public class ShipAnimator : MonoBehaviour
             ToggleMode();
         }
 
-        //Animate:
+        //Run Animations:
         foreach (ConfigAnimation animation in configAnimations) //Iterate through list of all animations
         {
             //Initialization:
             if (!animation.playing) continue;   //Skip inactive animations
             animation.TimeStep(Time.deltaTime); //Increment animation time
             ComputeAnimation(animation);        //Compute and apply animation movement
+        }
+
+        //Animate Screws:
+        switch (mode) //Determine screw behavior based on mode
+        {
+            case ShipAnim.vertical:
+                SetScrewSpeed(-ShipController.main.vel.y * screwSpeedMultiplier, 1, 0b0000); //Apply ship speed to all screws (in the same direction)
+                break;
+            case ShipAnim.horizontal:
+                SetScrewSpeed(ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b1001);  //Apply ship speed to screws (compensating for alternating directions)
+                SetScrewSpeed(-ShipController.main.vel.x * screwSpeedMultiplier, 1, 0b0110); //Apply ship speed to screws (compensating for alternating directions)
+                break;
+            case ShipAnim.transitioning:
+                SetScrewSpeed(0, 1, 0b0000); //Halt all screws
+                break;
         }
 
     }
@@ -127,36 +139,32 @@ public class ShipAnimator : MonoBehaviour
     //Animation Methods:
     public void ToggleMode()
     {
-        //Function: Begins change between horizontal and vertical ship modes
+        //Function: Toggles between horizontal and vertical ship modes
 
         //Begin Mode Transition Animation:
-        if (mode == ShipMode.vertical) //Vertical to horizontal transition
+        switch (mode) //Determine behavior based on current mode
         {
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = 1; //Set animation to play forward
-            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;      //Play animation
-            DigVisualizer.main.BuildBranch(); //Generate a new branch
-        }
-        else if (mode == ShipMode.horizontal) //Horizontal to vertical transition
-        {
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = -1; //Set animation to play backward
-            GetAnimationByName("ConfigAnim_ModeTransition").playing = true;       //Play animation
-            DigVisualizer.main.EndBranch(); //End current branch
-        }
-        else if (mode == ShipMode.transitioning) //Mid-transition
-        {
-            GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier *= -1;   //Reverse direction of animation
-            if (GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier > 0) //Animation is now playing forward
-            {
+            case ShipAnim.vertical:
+                GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = 1; //Set animation to play forward
+                GetAnimationByName("ConfigAnim_ModeTransition").playing = true;      //Play animation
                 DigVisualizer.main.BuildBranch(); //Generate a new branch
-            }
-            else //Animation is now playing backward
-            {
-                DigVisualizer.main.EndBranch(); //Cancel in-progress branch if applicable
-            }
+                break;
+            case ShipAnim.horizontal:
+                GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier = -1; //Set animation to play backward
+                GetAnimationByName("ConfigAnim_ModeTransition").playing = true;       //Play animation
+                DigVisualizer.main.EndBranch(); //End current branch
+                break;
+            case ShipAnim.transitioning:
+                GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier *= -1; //Reverse direction of animation
+                if (GetAnimationByName("ConfigAnim_ModeTransition").speedMultiplier > 0) //Animation is now playing forward
+                { DigVisualizer.main.BuildBranch(); } //Generate a new branch
+                else //Animation is now playing backward
+                { DigVisualizer.main.EndBranch(); } //Cancel in-progress branch if applicable
+                break;
         }
 
         //Cleanup:
-        mode =  ShipMode.transitioning; //Indicate that ship is now transitioning
+        mode =  ShipAnim.transitioning; //Indicate that ship is now transitioning
     }
     private void ComputeAnimation(ConfigAnimation animation)
     {
@@ -211,8 +219,8 @@ public class ShipAnimator : MonoBehaviour
         //Check For Mode Transition:
         if (animation.name == "ConfigAnim_ModeTransition") //Mode transition animation has just ended
         {
-            if (animation.currentTime <= 0) mode = ShipMode.vertical; //Ship is now horizontal
-            else mode = ShipMode.horizontal;                          //Ship is now vertical
+            if (animation.currentTime <= 0) mode = ShipAnim.vertical; //Ship is now horizontal
+            else mode = ShipAnim.horizontal;                          //Ship is now vertical
         }
     }
 

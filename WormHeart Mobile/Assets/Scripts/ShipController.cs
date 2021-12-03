@@ -17,8 +17,9 @@ public class ShipController : MonoBehaviour
     public float accelHorizontal;    //Horizontal acceleration factor (in units per second per second)
     [Range(0, 1)] public float brakeIntensityVert;  //Vertical deceleration factor (how fast drillship slows down)
     [Range(0, 1)] public float brakeIntensityHoriz; //Horizontal deceleration factor (how fast drillship slows down)
-    [Space()]
     public float brakeSnapThresh;    //Lower threshhold at which, when decelerating, drillship will come to a complete stop
+    [Space()]
+    public float shaftAlignTolerance; //How close center of drillship must be to the shaft for it to enter from a branch (will lerp into proper position from there)
 
     //Memory & Status Vars:
     internal LocomotionStatus locoStatus; //Drillship's current locomotion behavior (mutually exclusive states based on most recent input)
@@ -26,9 +27,13 @@ public class ShipController : MonoBehaviour
     private bool waitingToDeploy;         //Indicates that a switch mode command has been called but drillship has not yet come to a halt
 
     //Temp Debug Stuff:
-    public bool debugAccel;
+    [Space()]
+    public bool debugAccelLeft;
+    public bool debugAccelRight;
     public bool debugBrake;
     public bool debugDeploy;
+    public bool useMobileDebug;
+    private DeviceOrientation prevOrient;
 
 
     //Runtime Methods:
@@ -40,25 +45,45 @@ public class ShipController : MonoBehaviour
     private void Update()
     {
         //Temp Debug Stuff:
-        if (debugAccel)
+        if (useMobileDebug)
         {
-            Accel();
+            DeviceOrientation newOrient = Input.deviceOrientation;
+            if (newOrient == DeviceOrientation.LandscapeLeft && prevOrient == DeviceOrientation.Portrait) Deploy(false);
+            if (newOrient == DeviceOrientation.LandscapeRight && prevOrient == DeviceOrientation.Portrait) Deploy(false);
+            if (prevOrient == DeviceOrientation.LandscapeLeft && newOrient == DeviceOrientation.Portrait) Deploy(true);
+            if (prevOrient == DeviceOrientation.LandscapeRight && newOrient == DeviceOrientation.Portrait) Deploy(true);
+            prevOrient = newOrient;
+            if (Input.touchCount > 0) { Accel(); } else if (locoStatus != LocomotionStatus.braking) { Brake(); }
         }
         else
         {
-            ReleaseAccel();
-        }
-        if (debugBrake)
-        {
-            debugBrake = false;
-            debugAccel = false;
-            Brake();
-        }
-        if (debugDeploy)
-        {
-            debugAccel = false;
-            debugDeploy = false;
-            ToggleDeploy();
+            if (debugAccelLeft)
+            {
+                Accel(true);
+            }
+            else if (debugAccelRight)
+            {
+                Accel(false);
+            }
+            else
+            {
+                ReleaseAccel();
+            }
+
+            if (debugBrake)
+            {
+                debugBrake = false;
+                debugAccelLeft = false;
+                debugAccelRight = false;
+                Brake();
+            }
+            if (debugDeploy)
+            {
+                debugAccelLeft = false;
+                debugAccelRight = false;
+                debugDeploy = false;
+                ToggleDeploy();
+            }
         }
 
         //Move DrillShip:
@@ -159,6 +184,7 @@ public class ShipController : MonoBehaviour
             waitingToDeploy = false; //Ship does not need to wait to deploy for redundant mode
             return; //Ignore mode transition call
         }
+        if (vertical && Mathf.Abs(transform.position.x) > shaftAlignTolerance) return; //Do not allow player to leave a branch if they are not close enough to the shaft
 
         //Check Velocity:
         if (vel != Vector2.zero) //Ship is not currently stationary
@@ -190,5 +216,11 @@ public class ShipController : MonoBehaviour
                 CameraManipulator.main.ToggleMode(); //Directly call mode toggle on camera, ignoring deployment checks (because ship should already be stationary and other checks are irrelevant)
                 break;
         }
+    }
+    public void AutoFindShaft()
+    {
+        //Function: Used to return drillship to shaft automatically while in a branch
+
+
     }
 }

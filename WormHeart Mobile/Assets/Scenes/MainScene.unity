@@ -715,9 +715,12 @@ MonoBehaviour:
   brakeIntensityVert: 0.025
   brakeIntensityHoriz: 0.09
   brakeSnapThresh: 0.06
-  debugAccel: 0
+  shaftAlignTolerance: 0.05
+  debugAccelLeft: 0
+  debugAccelRight: 0
   debugBrake: 0
   debugDeploy: 0
+  useMobileDebug: 0
 --- !u!114 &84594246
 MonoBehaviour:
   m_ObjectHideFlags: 0

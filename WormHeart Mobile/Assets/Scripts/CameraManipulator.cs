@@ -30,6 +30,7 @@ public class CameraManipulator : MonoBehaviour
     private float vertCamSize;                  //Size camera initially starts at
     private float neutralCamPos;                //Y positiion camera initially starts at (where camera defaults to when drillship is stationary)
     private bool prevHorizOrientationLeft;      //Stores the direction of last landscape orientation (so that either version of landscape can be used)
+    private float shaftMisalignment;            //Stores starting x position offset of drillship if it is entering the shaft out of alignment
 
     //Runtime Methods:
     private void Awake()
@@ -61,6 +62,7 @@ public class CameraManipulator : MonoBehaviour
             currentTime += Time.deltaTime * speedMultiplier; //Apply timeStep to time tracker
             if (currentTime > modeSwapTime) //Camera mode swap animation has ended
             {
+                //Cleanup:
                 currentTime = modeSwapTime; //Cap time to total animation length
                 mode = AnimMode.horizontal; //Indicate that camera is now in horizontal mode
 
@@ -69,13 +71,22 @@ public class CameraManipulator : MonoBehaviour
             }
             else if (currentTime < 0) //Camera mode swap animation has ended (in reverse)
             {
-                currentTime = 0; //Cap time to zero
+                //Cleanup:
+                currentTime = 0;          //Cap time to zero
+                shaftMisalignment = 0;    //Reset misalignment storage variable
                 mode = AnimMode.vertical; //Indicate that camera is now in vertical mode
 
                 //Triggers:
+                transform.position = Vector3.zero; //Make sure drillship is homed to origin position
                 ShipAnimator.main.ToggleMode(AnimMode.vertical); //Trigger mode switch on ship
             }
             float t = currentTime / modeSwapTime; //Get interpolant value for current time (0-1 range)
+
+            //Check Drillship Alignment:
+            if (shaftMisalignment != 0) //Drillship is transitioning into vertical mode and is misaligned with shaft
+            {
+                transform.position = new Vector3(Mathf.Lerp(0, shaftMisalignment, t), 0, 0); //Gradually correct alignment with simple lerp during camera rotation
+            }
 
             //Move Camera:
             float o = 90; if (!prevHorizOrientationLeft) { o *= -1; } //Create variable to align horizontal orientation with last landscape direction
@@ -108,6 +119,7 @@ public class CameraManipulator : MonoBehaviour
                 break;
             case AnimMode.horizontal:
                 speedMultiplier = -1; //Play animation backward
+                shaftMisalignment = transform.position.x; //Get current x position of drillship relative to shaft (so that it can be smoothly corrected for)
                 break;
             case AnimMode.transitioning:
                 speedMultiplier *= -1; //Reverse direction of animation

@@ -32,8 +32,9 @@ public class ShipController : MonoBehaviour
     public bool debugAccelRight;
     public bool debugBrake;
     public bool debugDeploy;
+    [Space()]
     public bool useMobileDebug;
-
+    public bool debugTestAnimation;
 
     //Runtime Methods:
     private void Awake()
@@ -83,6 +84,12 @@ public class ShipController : MonoBehaviour
                 debugDeploy = false;
                 ToggleDeploy();
             }
+        }
+        if (debugTestAnimation)
+        {
+            debugTestAnimation = false;
+            ShipAnimator.main.GetAnimationByName("ConfigAnim_Platform").playing = true;
+            ShipAnimator.main.GetAnimationByName("ConfigAnim_Platform").speedMultiplier *= -1;
         }
 
         //Move DrillShip:

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: ConfigAnim_Braking
   m_EditorClassIdentifier: 
   origin: verticalConfig
-  target: brakingConfig
+  targets:
+  - name: brakingConfig
+    startTime: 0
   time: 0.25
   startingTime: 0
   playBackwards: 0

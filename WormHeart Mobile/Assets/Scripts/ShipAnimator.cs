@@ -208,7 +208,7 @@ public class ShipAnimator : MonoBehaviour
         {
             //Get Lerp Elements:
             int mask = curve.GetMask(); //Get element mask from curve
-            float interpolant = curve.curve.Evaluate(animation.InterpolantTime()); //Evaluate curve based on animation time
+            float interpolant = curve.curve.Evaluate(animation.RealInterpolantTime()); //Evaluate curve based on animation time (between current target and origin)
 
             //Check for Masked Transforms:
             if (!curve.includePos || !curve.includeRot || !curve.includeScl) //Curve has at least one interpolant masked out
@@ -220,12 +220,13 @@ public class ShipAnimator : MonoBehaviour
                 if (curve.includeScl) interpolants[2] = interpolant; //Unmask scale if selected
 
                 //Apply Movement:
-                LerpConfig(animation.originConfig, animation.targetConfig, interpolants, mask); //Lerp base config
+                LerpConfig(animation.GetCurrentOrigin(), animation.GetCurrentTarget(), interpolants, mask); //Lerp base config
                 continue; //Prevent additional application of movement
             }
 
             //Apply Movement:
-            LerpConfig(animation.originConfig, animation.targetConfig, interpolant, mask); //Lerp base config
+            if (animation.GetCurrentOrigin() == animation.GetCurrentTarget()) Debug.Log("poog");
+            LerpConfig(animation.GetCurrentOrigin(), animation.GetCurrentTarget(), interpolant, mask); //Lerp base config
         }
     }
     public ConfigAnimation GetAnimationByName(string animName)

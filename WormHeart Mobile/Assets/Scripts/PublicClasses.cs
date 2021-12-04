@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Configuration
 {
     //Description: Contains transform data for every element in the ship (used for lerping between poses)

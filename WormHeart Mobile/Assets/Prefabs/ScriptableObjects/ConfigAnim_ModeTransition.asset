@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: ConfigAnim_ModeTransition
   m_EditorClassIdentifier: 
   origin: verticalConfig
-  target: horizontalConfig
+  targets:
+  - name: horizontalConfig
+    startTime: 0
   time: 0.8
   startingTime: 0
-  playBackwards: 1
+  playBackwards: 0
   curves:
   - curve:
       serializedVersion: 2

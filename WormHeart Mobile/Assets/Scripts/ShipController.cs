@@ -20,6 +20,7 @@ public class ShipController : MonoBehaviour
     public float brakeSnapThresh;    //Lower threshhold at which, when decelerating, drillship will come to a complete stop
     [Space()]
     public float shaftAlignTolerance; //How close center of drillship must be to the shaft for it to enter from a branch (will lerp into proper position from there)
+    public float horizontalBounds;    //How far drillship can travel horizontally before it is stopped
 
     //Memory & Status Vars:
     internal LocomotionStatus locoStatus; //Drillship's current locomotion behavior (mutually exclusive states based on most recent input)
@@ -100,6 +101,11 @@ public class ShipController : MonoBehaviour
         else if (ShipAnimator.main.mode == AnimMode.horizontal && vel.x != 0) //Drillship is currently moving horizontally through branch
         {
             transform.Translate(vel.x * Time.deltaTime, 0, 0); //Move drillship along branch horizontally
+            if (transform.position.x > horizontalBounds || transform.position.x < -horizontalBounds) //Ship has passed outside horizontal bounds
+            {
+                vel.x = 0; //Cancel velocity
+                transform.position = new Vector3(horizontalBounds * Mathf.Sign(transform.position.x), 0); //Snap ship position to outer bound
+            }
         }
     }
     private void FixedUpdate()

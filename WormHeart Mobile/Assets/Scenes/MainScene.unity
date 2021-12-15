@@ -635,6 +635,7 @@ MonoBehaviour:
   brakeIntensityHoriz: 0.09
   brakeSnapThresh: 0.06
   shaftAlignTolerance: 0.085
+  horizontalBounds: 2.15
   debugAccelLeft: 0
   debugAccelRight: 0
   debugBrake: 0
@@ -4512,7 +4513,6 @@ MonoBehaviour:
   - {fileID: 6264327264668098158, guid: 7f129d8480f49ea4e981194834eea8a0, type: 3}
   - {fileID: 6264327264668098158, guid: cb81a69bb2be5104a99a45a734d12a7f, type: 3}
   latestLayer: {fileID: 358277846}
-  newLayerDist: -0.32
 --- !u!1 &2085286660
 GameObject:
   m_ObjectHideFlags: 0

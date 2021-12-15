@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ShipAnimator : MonoBehaviour
 {
-    //Description: Handles programmatic animation of DrillShip, called on by other scripts to do so
-    //             Also contains state data on DrillShip
+    //Description: -Handles programmatic animation of DrillShip, called on by other scripts to do so
+    //             -Also contains state data on DrillShip
 
     //Objects & Components:
     public static ShipAnimator main;           //Singleton instance of this script in scene
